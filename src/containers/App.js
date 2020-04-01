@@ -1,9 +1,28 @@
 import React from 'react';
+import { connect } from 'react-redux';
+import { setSearchField } from '../actions';
 import CardList from '../components/CardList';
 import SearchBox from '../components/SearchBox';
 import Scroll from '../components/Scroll';
 import './App.css';
 
+
+
+//tells what state values  i need to listen to 
+const mapStateToProps = (state) => {
+    return {
+        searchField: state.searchField
+    }
+}
+//tell what events i need to listen to
+const MapDispatchToProps = (dispatch) => {
+    return {
+        onSearchChange: (event) => {
+            return dispatch(setSearchField(event.target.value))
+        }
+
+    }
+}
 
 //class component since inaddition to return we need to use renturn constructor etc..
 class App extends React.Component {
@@ -12,33 +31,33 @@ class App extends React.Component {
         super();
         //intialize the state of the app.This is the first step to be done   
         this.state = {
-            robots: [],
-            searchField: ''
+            robots: []
+
         }
     }
     // this is the parent function that is passed to the child components
     // following format shoudl be used to describe function, else correct event cannot be processed
-    onSearchChange = (event) => {
-        //we will update state with result from the child componet
+    // onSearchChange = (event) => {
+    //     //we will update state with result from the child componet
 
-        this.setState({ searchField: event.target.value });
-        //use {} to execute variables
-        // this.setState to be used for setting a state variable
+    //     this.setState({ searchField: event.target.value });
+    //     //use {} to execute variables
+    //     // this.setState to be used for setting a state variable
 
-    }
+    // }
 
-    componentDidMount()
-    {
+    componentDidMount() {
         fetch("https://jsonplaceholder.typicode.com/users")
-        .then(response=>response.json())
-        .then(users=>this.setState({robots:users}));
+            .then(response => response.json())
+            .then(users => this.setState({ robots: users }));
     }
     render() {//called everytime there is a change
 
-        const { robots, searchField } = this.state;
-
+        const { robots } = this.state;
+        const { searchField, onSearchChange } = this.props;
         const filteredRobots = robots.filter(robot => {
             return robot.name.toLocaleLowerCase().includes(searchField.toLocaleLowerCase());
+
 
         })
         //if (0)=>false and if(1)=>true
@@ -46,10 +65,10 @@ class App extends React.Component {
             <div>
                 <div className='tc'>
                     <h1 className='f1'>Robo Friends</h1>
-                    <SearchBox onSearch={this.onSearchChange} />
+                    <SearchBox onSearch={onSearchChange} />
                 </div>
                 <Scroll>
-                <CardList robots={filteredRobots} />
+                    <CardList robots={filteredRobots} />
                 </Scroll>
             </div>
 
@@ -57,7 +76,7 @@ class App extends React.Component {
     }
 }
 
-export default App;
+export default connect(mapStateToProps, MapDispatchToProps)(App);
 
 // const robots = [
 //     {
