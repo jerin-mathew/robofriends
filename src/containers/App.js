@@ -1,9 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { setSearchField } from '../actions';
+import { setSearchField, requestRobots } from '../actions';
 import CardList from '../components/CardList';
 import SearchBox from '../components/SearchBox';
 import Scroll from '../components/Scroll';
+import ErrorBoundary from './ErrorBoundary';
 import './App.css';
 
 
@@ -11,14 +12,22 @@ import './App.css';
 //tells what state values  i need to listen to 
 const mapStateToProps = (state) => {
     return {
-        searchField: state.searchField
+        searchField: state.searchRobots.searchField,
+        robots: state.requestRobots.robots,
+        isPending: state.requestRobots.isPending,
+        error: state.requestRobots.error
     }
 }
 //tell what events i need to listen to
 const MapDispatchToProps = (dispatch) => {
     return {
         onSearchChange: (event) => {
-            return dispatch(setSearchField(event.target.value))
+            return dispatch(setSearchField(event.target.value))//dispatching an object
+
+
+        },
+        onRobotRequest: () => {
+            return dispatch(requestRobots())//dispatching a function
         }
 
     }
@@ -27,48 +36,28 @@ const MapDispatchToProps = (dispatch) => {
 //class component since inaddition to return we need to use renturn constructor etc..
 class App extends React.Component {
 
-    constructor() {//called only once
-        super();
-        //intialize the state of the app.This is the first step to be done   
-        this.state = {
-            robots: []
-
-        }
-    }
-    // this is the parent function that is passed to the child components
-    // following format shoudl be used to describe function, else correct event cannot be processed
-    // onSearchChange = (event) => {
-    //     //we will update state with result from the child componet
-
-    //     this.setState({ searchField: event.target.value });
-    //     //use {} to execute variables
-    //     // this.setState to be used for setting a state variable
-
-    // }
-
     componentDidMount() {
-        fetch("https://jsonplaceholder.typicode.com/users")
-            .then(response => response.json())
-            .then(users => this.setState({ robots: users }));
+        this.props.onRobotRequest();
     }
     render() {//called everytime there is a change
 
-        const { robots } = this.state;
-        const { searchField, onSearchChange } = this.props;
+        const { searchField, onSearchChange, robots, isPending } = this.props;
         const filteredRobots = robots.filter(robot => {
             return robot.name.toLocaleLowerCase().includes(searchField.toLocaleLowerCase());
 
 
         })
         //if (0)=>false and if(1)=>true
-        return !robots.length ? <h1>Loading...</h1> : (//while array is fetched from webservice
+        return isPending ? <h1>Loading...</h1> : (//while array is fetched from webservice
             <div>
                 <div className='tc'>
                     <h1 className='f1'>Robo Friends</h1>
                     <SearchBox onSearch={onSearchChange} />
                 </div>
                 <Scroll>
+                    <ErrorBoundary>
                     <CardList robots={filteredRobots} />
+                    </ErrorBoundary>
                 </Scroll>
             </div>
 
