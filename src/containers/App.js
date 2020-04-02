@@ -51,7 +51,7 @@ class App extends React.Component {
         return isPending ? <h1>Loading...</h1> : (//while array is fetched from webservice
             <div>
                 <div className='tc'>
-                    <h1 className='f1'>Robo Friends</h1>
+                    <h1 className='f1'>Robo Friends with redux</h1>
                     <SearchBox onSearch={onSearchChange} />
                 </div>
                 <Scroll>
